@@ -9,6 +9,7 @@ import networkx as nx
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import random
 
 def readGraph(graphName):
     #Input: name of the file from which graph has to be read
@@ -73,6 +74,34 @@ def plotSvsD(b, d, lambda1, part):
     os.makedirs(os.path.dirname(plotFile), exist_ok=True)
     plt.savefig(plotFile, bbox_inches='tight')
 
+def sis_vpm(graphName):
+    nodes = graphName.nodes()
+    infected_nodes = set(np.random.choice(nodes, int(len(nodes)/100), replace = False))
+    non_infected_nodes = set(nodes)-set(infected_nodes)
+    new_infected_nodes=[]
+    for i in range(0,100):
+        cannot_be_cured_nodes=set()
+        for node in non_infected_nodes:
+            neighbors=graphName.neighbors(node)
+            if len(set(infected_nodes).difference(set(neighbors))) !=0 :
+                infection_prob=random.random()*0.7
+                if infection_prob>0.5:
+                    new_infected_nodes.append(node)
+                    x=int(0.7*random.random()*10)
+                    if x<1:
+                        x=1
+                    cannot_be_cured_nodes = cannot_be_cured_nodes.union(set(np.random.choice(list(set(infected_nodes).difference(set(neighbors))),1,replace = False)))
+        #print "before healing"+str(len(infected_nodes))
+        healed_nodes=set()
+        for node in infected_nodes.difference(cannot_be_cured_nodes):
+            healing_prob=0.6*random.random()
+            if healing_prob>0.5:
+                healed_nodes=healed_nodes.union(set([node]))
+        #print "after healing"+str(len(infected_nodes.difference(healed_nodes))) 
+        infected_nodes=(set(new_infected_nodes).union(infected_nodes)).difference(healed_nodes)
+        print str(float(len(infected_nodes))/float(len(nodes))) +"  " +str(i+1)
+        non_infected_nodes=set(nodes).difference(infected_nodes)
+        cannot_be_cured_nodes=set()    
 
 if __name__ == "__main__":
     #Read file and create a graph
@@ -105,3 +134,10 @@ if __name__ == "__main__":
     plotSvsB(b, d, lambda1, "part2")
     # Plot graph for strength vs d (b fixed)
     plotSvsD(b, d, lambda1, "part2")
+    
+    print "first"
+    sis_vpm(graph)
+    print "second"
+    sis_vpm(graph)
+    print "third"
+    sis_vpm(graph)
